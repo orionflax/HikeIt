@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  routes_api:
+    build: ./hike_db_api
+    ports:
+      - '5001:5001'
+    volumes:
+      - ./hike_db_api:/app
+    depends_on:
+      - mountains
+  mountains:
+    image: postgres:13-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ./initial/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_USER: filefish
+      POSTGRES_PASSWORD: filefish
+      POSTGRES_DB: mountains
+    ports:
+      - 5432:5432
+
+volumes:
+  postgres_data:
