@@ -1,18 +1,18 @@
 import csv
 import psycopg2
 import re
-
+import sys
 # Database connection parameters
 db_params = {
-    'database': 'mountain',
+    'database': 'mountains',
     'user': 'filefish',
     'password': 'filefish',
-    'host': 'mountains',
+    'host': 'localhost',
     'port': '5432'
 }
 
 # Define the CSV file path
-csv_file_path = 'your_csv_file.csv'
+csv_file_path = 'routes.csv'
 
 def parse_2d_array(array_string):
     # Convert string representation of 2D array to actual list of lists (2D array)
@@ -21,22 +21,23 @@ def parse_2d_array(array_string):
 
 
 def parse_route_profile(profile_string):
+    profile_string, "this is the route_profile"
+    profile_string = profile_string.replace('Â', '')
+    #print(profile_string)
     # Regular expression pattern to match distances in km and m, respectively
-    pattern = re.compile(r'(\d+(\.\d+)?)\s*km|\((\d+(\.\d+)?)\s*miles\)|(\d+)\s*m\s*\((\d+)\s*ft\)')
-    matches = pattern.findall(profile_string)
+    pattern = r'(\d+(\.\d+)?)\s*km'
+    matches = re.findall(pattern,profile_string)
     pattern1 = r'ascent\d+'
+    pattern2 = r'miles\)\d+'
+    ascent_max_h = re.findall(pattern2,profile_string)
     match_max_h = re.findall(pattern1,profile_string)
-    # Extract the distance and ascent, which are the first and third groups in the pattern
-    # We'll also extract the maximum height, which are the fifth and sixth groups in the pattern
     distance_km = float(matches[0][0])  # First match, km
-    ascent_m = int(matches[2][4])   # Third match, m
-    for x in route_profile:
+    for x in profile_string:
         if 'ascent' in x:
-            print( 'ascent',x[5:])
             break 
         else:
             pass
-    return int(distance_km), int(ascent_m),int(match_max_h[0][6:])
+    return distance_km, (ascent_max_h[0][6:]),(match_max_h[0][6:])
 
 def extract_and_format_path_name(url):
     # Find the start of the path_name parameter
@@ -52,16 +53,30 @@ def extract_and_format_path_name(url):
 
     return formatted_string
 
-# Example usage
-url = "https://ldwa.org.uk/ldp/members/show_path.php?path_name=Nunwell+Trail"
-path_name = extract_and_format_path_name(url)
-print(path_name)
+def extract_and_format_path_name(url):
+    # Find the start of the path_name parameter
+    start = url.find("path_name=") + len("path_name=")
+    if start == -1:
+        return None
 
+    # Extract the substring after path_name
+    extracted_string = url[start:]
+
+    # Replace '+' with spaces
+    formatted_string = extracted_string.replace('+', ' ')
+
+    return formatted_string
 
 # Connect to the PostgreSQL database
 conn = psycopg2.connect(**db_params)
 # Create a cursor object
 cur = conn.cursor()
+
+
+# Increase the maximum field size limit
+max_int_size = 2**31 - 1
+csv.field_size_limit(max_int_size)
+
 
 # Read the CSV file and insert data into the database
 with open(csv_file_path, 'r') as csvfile:
@@ -69,8 +84,12 @@ with open(csv_file_path, 'r') as csvfile:
     for row in reader:
         # Parse the data
         route_mappings = parse_2d_array(row['Route Mappings'])
+        if (len(row['Route Profile']) == 0):
+            print('failed to add')
+            continue
+        
         distance, ascent, max_height = parse_route_profile(row['Route Profile'])
-        name = row['Route Name']
+        name = extract_and_format_path_name(row['Route Name'])
 
         # Create SQL insert statement
         insert_query = '''
@@ -80,9 +99,8 @@ with open(csv_file_path, 'r') as csvfile:
 
         # Execute the insert statement
         cur.execute(insert_query, (route_mappings, distance, ascent, max_height, name))
-
-# Commit the changes
-conn.commit()
+        print(cur.statusmessage)
+        conn.commit()
 
 # Close the cursor and connection
 cur.close()

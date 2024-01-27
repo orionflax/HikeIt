@@ -13,7 +13,7 @@ def parse_route_profile(profile_string):
     # We'll also extract the maximum height, which are the fifth and sixth groups in the pattern
     distance_km = float(matches[0][0])  # First match, km
     ascent_m = int(matches[2][4])   # Third match, m
-    for x in route_profile:
+    for x in profile_string:
         if 'ascent' in x:
             print( 'ascent',x[5:])
             break 
