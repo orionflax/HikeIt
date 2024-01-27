@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Iterate this block for 5 hikers -->
+    <EditText
+        android:id="@+id/nameInput1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Hiker 1 Name" />
+
+    <EditText
+        android:id="@+id/strengthInput1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:hint="Hiker 1 Strength (1-5)" />
+
+    <!-- ... similar blocks for hiker 2, 3, 4, 5 ... -->
+
+    <EditText
+        android:id="@+id/radiusInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:hint="Search Radius" />
+
+    <Button
+        android:id="@+id/submitButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Submit"
+        android:layout_gravity="center_horizontal"/>
+
+    <TextView
+        android:id="@+id/resultText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp" />
+</LinearLayout>
+

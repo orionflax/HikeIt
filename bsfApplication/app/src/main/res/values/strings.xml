@@ -1,0 +1,67 @@
+<resources>
+    <string name="app_name">bsfApplication</string>
+
+        <string-array name="category_array">
+        <item>Grocery 1</item>
+        <item>Soft Drinks 2</item>
+        <item>Confectionary 3</item>
+        <item>Crips/Snacks 4</item>
+        <item>Beers 5</item>
+        <item>Wines 6</item>
+        <item>Spirits 7</item>
+        <item>Cigarettes 8</item>
+        <item>Household 9</item>
+        <item>Dairy 10</item>
+        <item>Cakes 11</item>
+        <item>Frozen 12</item>
+        <item>BLANK 13</item>
+        <item>Fruits/Veg 14</item>
+        <item>BLANK 15</item>
+        <item>Pet food 16</item>
+        <item>Stationary 17</item>
+        <item>Medicine 18</item>
+        <item>Misc. 19</item>
+        <item>BLANK 20</item>
+        <item>Greeting Cards 21</item>
+        <item>BLANK 22</item>
+        <item>Stamps 23</item>
+        <item>Toys 24</item>
+        <item>Ice Cream 25</item>
+        <item>Bakery 26</item>
+        <item>News 27</item>
+        <item>Magazine 28</item>
+        <item>News/Magz 29</item>
+        <item>Grocery N/Vat 30</item>
+        <item>BLANK 31</item>
+        <item>Toiletries 32</item>
+        <item>DEPT 33</item>
+        <item>DEPT 34</item>
+        <item>DEPT 35</item>
+        <item>DEPT 36</item>
+        <item>DEPT 37</item>
+        <item>DEPT 38</item>
+        <item>DEPT 39</item>
+        <item>DEPT 40</item>
+        <item>DEPT 41</item>
+        <item>DEPT 42</item>
+        <item>DEPT 43</item>
+        <item>DEPT 44</item>
+        <item>DEPT 45</item>
+        <item>DEPT 46</item>
+        <item>DEPT 47</item>
+        <item>DEPT 48</item>
+        <item>Card charge 49</item>
+        <item>DEPT 50</item>
+        <item>Lottery 51</item>
+        <item>Sratch Card 52</item>
+        <item>Pay Point 53</item>
+        <item>Oyster 54</item>
+        <item>Phone card 55</item>
+        <item>DEPT 56</item>
+        <item>DEPT 57</item>
+        <item>DEPT 58</item>
+        <item>DEPT 59</item>
+        <item>DEPT 60</item>
+        <!-- other categories -->
+    </string-array>
+</resources>
