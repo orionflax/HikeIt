@@ -5,22 +5,22 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Iterate this block for 5 hikers -->
-    <EditText
-        android:id="@+id/nameInput1"
+    <!-- Spinner for selecting the number of hikers -->
+    <Spinner
+        android:id="@+id/hikerCountSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Container for dynamically adding hiker details -->
+    <LinearLayout
+        android:id="@+id/hikerDetailsContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Hiker 1 Name" />
+        android:orientation="vertical">
+        <!-- Hiker details will be added here dynamically -->
+    </LinearLayout>
 
-    <EditText
-        android:id="@+id/strengthInput1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:hint="Hiker 1 Strength (1-5)" />
-
-    <!-- ... similar blocks for hiker 2, 3, 4, 5 ... -->
-
+    <!-- Input field for search radius -->
     <EditText
         android:id="@+id/radiusInput"
         android:layout_width="match_parent"
@@ -28,6 +28,7 @@
         android:inputType="number"
         android:hint="Search Radius" />
 
+    <!-- Submit button -->
     <Button
         android:id="@+id/submitButton"
         android:layout_width="wrap_content"
@@ -35,10 +36,10 @@
         android:text="Submit"
         android:layout_gravity="center_horizontal"/>
 
+    <!-- Text view for displaying results or errors -->
     <TextView
         android:id="@+id/resultText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp" />
 </LinearLayout>
-

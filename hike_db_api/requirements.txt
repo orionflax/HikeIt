@@ -6,3 +6,4 @@ flask-bcrypt
 flask-migrate
 python-dotenv
 flask-cors
+pyproj

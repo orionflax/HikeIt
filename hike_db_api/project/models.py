@@ -14,6 +14,7 @@ class Routes(db.Model):
     ascent = db.Column(db.Integer, nullable=False)
     max_height = db.Column(db.Integer, nullable=False)
     name = db.Column(db.String(200), nullable=False)
+    average_location = db.Column(ARRAY(db.Integer,dimensions=1),nullable=False)
     
     def __repr__(self):
         return f'<Routes {self.name}>'

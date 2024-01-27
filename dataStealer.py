@@ -2,6 +2,7 @@ import csv
 import psycopg2
 import re
 import sys
+from pyproj import CRS, Transformer
 # Database connection parameters
 db_params = {
     'database': 'mountains',
@@ -13,6 +14,32 @@ db_params = {
 
 # Define the CSV file path
 csv_file_path = 'routes.csv'
+import math
+
+def convert_osgb36_to_wgs84(easting, northing):
+    crs_osgb36 = CRS("EPSG:27700")
+    crs_wgs84 = CRS("EPSG:4326")
+    transformer = Transformer.from_crs(crs_osgb36, crs_wgs84)
+    lon, lat = transformer.transform(easting, northing)
+    return lat, lon
+
+def average_osgb36_coordinates(coords):
+    """
+    Calculate the average of all OSGB36 coordinate points, convert them to latitude and longitude,
+    then return the average latitude and longitude.
+    """
+    if not coords or not coords[0]:
+        return None
+
+    total_lat, total_lon = 0, 0
+    for easting, northing in coords:
+        lat, lon = convert_osgb36_to_wgs84(easting, northing)
+        total_lat += lat
+        total_lon += lon
+
+    avg_lat = total_lat / len(coords)
+    avg_lon = total_lon / len(coords)
+    return [avg_lat, avg_lon]
 
 def parse_2d_array(array_string):
     # Convert string representation of 2D array to actual list of lists (2D array)
@@ -87,18 +114,18 @@ with open(csv_file_path, 'r') as csvfile:
         if (len(row['Route Profile']) == 0):
             print('failed to add')
             continue
-        
+        average_location = average_osgb36_coordinates(route_mappings)
         distance, ascent, max_height = parse_route_profile(row['Route Profile'])
         name = extract_and_format_path_name(row['Route Name'])
 
         # Create SQL insert statement
         insert_query = '''
-            INSERT INTO routes (route_mappings, distance, ascent, max_height, name)
-            VALUES (%s, %s, %s, %s, %s);
+            INSERT INTO routes (route_mappings, distance, ascent, max_height, name, average_location)
+            VALUES (%s, %s, %s, %s, %s, %s);
         '''
 
         # Execute the insert statement
-        cur.execute(insert_query, (route_mappings, distance, ascent, max_height, name))
+        cur.execute(insert_query, (route_mappings, distance, ascent, max_height, name, average_location))
         print(cur.statusmessage)
         conn.commit()
 

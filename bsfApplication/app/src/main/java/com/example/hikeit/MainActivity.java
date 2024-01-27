@@ -3,8 +3,12 @@ package com.example.hikeit;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.android.volley.Request;
@@ -15,11 +19,13 @@ import org.json.JSONObject;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Bundle;
 import android.content.Context;
 import androidx.core.app.ActivityCompat;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,7 +34,8 @@ public class MainActivity extends AppCompatActivity {
     private LocationListener locationListener;
     private double latitude;
     private double longitude;
-
+    private LinearLayout hikerDetailsContainer;
+    private List<View> hikerDetailViews = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,8 +69,30 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION}, 1);
         } else {
             // Permission has already been granted
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         }
+        Spinner hikerCountSpinner = findViewById(R.id.hikerCountSpinner);
+        ArrayAdapter<Integer> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new Integer[]{1, 2, 3, 4, 5});
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        hikerCountSpinner.setAdapter(adapter);
+
+        // Container for dynamically adding/removing hiker details
+        hikerDetailsContainer = findViewById(R.id.hikerDetailsContainer); // Directly use the member variable
+
+
+        // Handle spinner selection to update the number of hiker inputs
+        hikerCountSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                updateHikerInputs(position + 1, hikerDetailsContainer); // Position + 1 because spinner positions are zero-based
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        // Set up the submit button
         Button submitButton = findViewById(R.id.submitButton);
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,46 +111,70 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+    private void updateHikerInputs(int count, LinearLayout hikerDetailsContainer) {
+        this.hikerDetailsContainer.removeAllViews();
+        hikerDetailViews.clear();
 
+        for (int i = 0; i < count; i++) {
+            View hikerDetailView = getLayoutInflater().inflate(R.layout.hiker_details, this.hikerDetailsContainer, false);
+            hikerDetailView.findViewById(R.id.nameInput).setTag("nameInput" + (i + 1));
+            hikerDetailView.findViewById(R.id.strengthInput).setTag("strengthInput" + (i + 1));
+            this.hikerDetailsContainer.addView(hikerDetailView);
+            hikerDetailViews.add(hikerDetailView); // Now correctly updating the member variable
+        }
+    }
     private void submitForm() {
-        // Get form inputs
-        // Assuming EditTexts for 5 hikers (nameInput1, strengthInput1, ..., nameInput5, strengthInput5) and a radiusInput
+        Log.d("Debug", "submitForm called"); // Debug log
+
         EditText radiusInput = findViewById(R.id.radiusInput);
-        int radius = Integer.parseInt(radiusInput.getText().toString());
+        int radius = 0;
+        try {
+            radius = Integer.parseInt(radiusInput.getText().toString());
+        } catch (NumberFormatException e) {
+            Log.e("Error", "Invalid radius input", e);
+            return;
+        }
 
-        // Fetch GPS coordinates
-        // This is a placeholder, replace with actual GPS fetching logic
-
-
-        // Construct JSON
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("radius", radius);
             jsonObject.put("latitude", latitude);
             jsonObject.put("longitude", longitude);
 
+            Log.d("Debug", "hikerViews size: " + hikerDetailViews.size()); // Check the size of hikerViews
+
             // Add hiker details
-            for (int i = 1; i <= 5; i++) {
-                EditText nameInput = findViewById(getResources().getIdentifier("nameInput" + i, "id", getPackageName()));
-                EditText strengthInput = findViewById(getResources().getIdentifier("strengthInput" + i, "id", getPackageName()));
+            for (int i = 0; i < hikerDetailViews.size(); i++) {
+                Log.d("Debug", "Inside loop: " + i); // Log each iteration
+
+                View hikerView = hikerDetailViews.get(i);
+                EditText nameInput = hikerView.findViewById(R.id.nameInput);
+                EditText strengthInput = hikerView.findViewById(R.id.strengthInput);
 
                 String name = nameInput.getText().toString();
-                int strength = Integer.parseInt(strengthInput.getText().toString());
+                int strength;
+                try {
+                    strength = Integer.parseInt(strengthInput.getText().toString());
+                } catch (NumberFormatException e) {
+                    Log.e("Error", "Invalid strength input for hiker " + (i + 1), e);
+                    continue; // Skip this hiker and continue with the next
+                }
 
                 JSONObject hikerDetails = new JSONObject();
                 hikerDetails.put("name", name);
                 hikerDetails.put("strength", strength);
 
-                jsonObject.put("hiker" + i, hikerDetails);
+                jsonObject.put("hiker" + (i + 1), hikerDetails);
             }
+            Log.d("RequestJson", jsonObject.toString());
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("Error", "Exception in submitForm", e);
         }
 
         // Send JSON to API
         String jsonString = jsonObject.toString();
         Log.d("RequestJson", jsonString);
-        String url = "http://10.0.2.2:5001/submitForm"; // 10.0.2.2 is localhost for the Android emulator
+        String url = "http://10.2.189.141:5001/submitForm"; // 10.0.2.2 is localhost for the Android emulator
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 response -> {
                     // Handle response
@@ -132,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
                     // Handle error
                     TextView resultText = findViewById(R.id.resultText);
                     resultText.setText("Error: " + error.toString());
+
                 }) {
             @Override
             public byte[] getBody() {
