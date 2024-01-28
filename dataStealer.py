@@ -21,25 +21,21 @@ def convert_osgb36_to_wgs84(easting, northing):
     crs_wgs84 = CRS("EPSG:4326")
     transformer = Transformer.from_crs(crs_osgb36, crs_wgs84)
     lon, lat = transformer.transform(easting, northing)
-    return lat, lon
+    return lon, lat
 
-def average_osgb36_coordinates(coords):
+def first_osgb36_coordinates(coords):
     """
     Calculate the average of all OSGB36 coordinate points, convert them to latitude and longitude,
     then return the average latitude and longitude.
     """
     if not coords or not coords[0]:
         return None
+    
 
     total_lat, total_lon = 0, 0
-    for easting, northing in coords:
-        lat, lon = convert_osgb36_to_wgs84(easting, northing)
-        total_lat += lat
-        total_lon += lon
-
-    avg_lat = total_lat / len(coords)
-    avg_lon = total_lon / len(coords)
-    return [avg_lat, avg_lon]
+    
+    lat, lon = convert_osgb36_to_wgs84(coords[0][0], coords[0][1])
+    return [lat,lon]
 
 def parse_2d_array(array_string):
     # Convert string representation of 2D array to actual list of lists (2D array)
@@ -114,7 +110,7 @@ with open(csv_file_path, 'r') as csvfile:
         if (len(row['Route Profile']) == 0):
             print('failed to add')
             continue
-        average_location = average_osgb36_coordinates(route_mappings)
+        average_location = first_osgb36_coordinates(route_mappings)
         distance, ascent, max_height = parse_route_profile(row['Route Profile'])
         name = extract_and_format_path_name(row['Route Name'])
 
